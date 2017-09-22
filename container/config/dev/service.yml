@@ -1,0 +1,234 @@
+clientConfig:
+  approvedClients: ["dasher","merch","wally","grumbles","caspar","lionel","sniper","billy"]
+esConfiguration:
+  nodeClient: false
+  clusterName: santa-hugo-es
+  servers: ["10.32.201.148:9300","10.32.161.145:9300","10.32.153.170:9300"]
+bernardESConfiguration:
+  nodeClient: false
+  clusterName: bernard
+  servers: ["10.32.149.161:9300","10.32.201.159:9300","10.33.77.146:9300"]
+spCMSConfig:
+  host: 10.65.30.95
+  port: 26600
+  timeout: 120000
+auditDataConfig:
+  secure: false
+  hbaseSite: /etc/fk-dsp-santa-hugo/appcfg/new-dc-hbase-site.xml
+  columnFamily: od
+  column: data
+proxyLiteConfig:
+  port: 7779
+  commands:
+  - poolName: listingInfoView
+    host: 10.47.1.8
+    port: 31200
+    connectionTimeout: 1000
+    operationTimeout: 2000
+    maxConnections: 50
+    threadPoolConf:
+      keepAliveTimeMinutes: 4
+      threadPoolCoreSize: 150
+  - poolName: victorEntityCollectionInfo
+    host: 10.33.105.63
+    port: 7710
+    connectionTimeout: 1000
+    operationTimeout: 2000
+    maxConnections: 50
+    threadPoolConf:
+      keepAliveTimeMinutes: 4
+      threadPoolCoreSize: 150
+  - poolName: dasherStatusOverrideInfo
+    host: 10.32.69.36
+    port: 7788
+    connectionTimeout: 1000
+    operationTimeout: 3000
+    maxConnections: 100
+    threadPoolConf:
+      keepAliveTimeMinutes: 4
+      threadPoolCoreSize: 150
+  - poolName: categoryTreeInfo
+    host: 10.85.50.97
+    port: 80
+    connectionTimeout: 1000
+    operationTimeout: 60000
+    maxConnections: 5
+    threadPoolConf:
+      keepAliveTimeMinutes: 1
+      threadPoolCoreSize: 5
+    commandConf:
+      threadTimeout: 60000
+  - poolName: cmsCategoryTreeInfo
+    host: 10.85.52.11
+    port: 80
+    connectionTimeout: 1000
+    operationTimeout: 60000
+    maxConnections: 5
+    threadPoolConf:
+      keepAliveTimeMinutes: 1
+      threadPoolCoreSize: 5
+restbusClientConfiguration:
+  odTopicName: production.flipkart.santa.hugo.change.event
+  opTopicName: production.flipkart.santa.hugo.offer.participant.event
+  sdTopicName: prod.flipkart.santa.hugo.sale.event
+  spTopicName: prod.flipkart.santa.hugo.sale.participant.event
+  ccdTopicName: preprod.flipkart.santa.hugo.couponcampaign.event
+restbusConfiguration:
+  lockType: MYSQL
+hyperionConfig:
+  host: 10.47.2.147
+  port: 8201
+  clusterId: dsp
+  messageQueueFilePath: /tmp/queue
+  appName: hugo
+  maxQueueSize: 1200000
+  publishEvents: true
+  batchSize: 1000
+database:
+  driverClass: com.mysql.jdbc.Driver
+  user: dsp_santa_rw
+  password: dsp_santa_rw
+  url: jdbc:mysql://10.34.49.188:3306/hugo?useUnicode=yes&characterEncoding=UTF-8
+  properties:
+    charSet: UTF-8
+  maxWaitForConnection: 1s
+  validationQuery: "/* MyService Health Check */ SELECT 1"
+  minSize: 8
+  maxSize: 400
+  checkConnectionWhileIdle: true
+  validationInterval: 10s
+  minIdleTime: "1 minute"
+server:
+  applicationConnectors:
+  - type: http
+    port: 7777
+    acceptorThreads: 4
+  adminConnectors:
+  - type: http
+    port: 7778
+  minThreads: 8
+  maxThreads: 1024
+  idleThreadTimeout: 200s
+  shutdownGracePeriod: 5s
+  gzip:
+    enabled: true
+    minimumEntitySize: "256 bytes"
+    bufferSize: 8KiB
+    excludedUserAgents: []
+    compressedMimeTypes: []
+  requestLog:
+    timeZone: IST
+    appenders:
+    - type: file-size-rolled
+      logFormat: "%d{dd-MM-yyyy HH:mm:ss.SSS} %X{X-Client-Trace-ID} %X{X-Server-Request-ID} %X{X-Client-IP-Address}  %X{X-Client} %X{X-Client-Hostname} [%thread] %-5level %logger{36} - %msg%n"
+      threshold: ALL
+      currentLogFilename: /var/log/flipkart/dsp/santa/hugo/access.log
+      archive: true
+      archivedLogFilenamePattern: /var/log/flipkart/dsp/santa/hugo/access.%i.log.gz
+      archivedFileCount: 2
+    - type: console
+      logFormat: "%-5p [%d{ISO8601}] [%X{reqId} %X{txnId}] %c{1}: %m%ex"
+executionFWConfig:
+  configs:
+  - executorName: LISTINGS_INFO
+    tenant: flipkart
+    version: 1.0
+    cacheType: NONE
+    failoverStrategy:
+    - retryCount: 0
+      failoverType: SYNC
+    cannedResponseConfig:
+      cannedResponse:
+        a: b
+    enabled: true
+  - executorName: VICTOR_ECS
+    tenant: flipkart
+    version: 1.0
+    cacheType: NONE
+    failoverStrategy:
+    - retryCount: 0
+      failoverType: SYNC
+    enabled: true
+  - executorName: DASHER
+    tenant: flipkart
+    version: 1.0
+    cacheType: NONE
+    failoverStrategy:
+    - retryCount: 0
+      failoverType: SYNC
+    enabled: true
+  - executorName: SP_CMS
+    tenant: flipkart
+    version: 1.0
+    cacheType: NONE
+    failoverStrategy:
+    - retryCount: 0
+      failoverType: SYNC
+    enabled: true
+exchangeConfiguration:
+  attributes: ["gadget","brand","model","processor","type","watches"]
+constraintsConfiguration:
+  channels:
+    MApp:
+      channel:
+        channelType: MApp
+        includes:
+        - key: fkApp.type
+          values: ["Retail"]
+        description: MAppOnly
+    EBooks:
+      channel:
+        channelType: EBooks
+        includes:
+        - key: fkApp.type
+          values: ["ebook"]
+        description: EBooksOnly
+    Website:
+      channel:
+        channelType: Website
+        includes:
+        - key: device.type
+          values: ["Computer","Tablet","Mobile"]
+        excludes:
+        - key: fkApp.type
+          values: ["Retail","ebook","msite"]
+        description: WebsiteOnly
+    MSite:
+      channel:
+        channelType: MSite
+        includes:
+        - key: fkApp.type
+          values: ["msite"]
+        description: MSite
+logging:
+  level: INFO
+  loggers:
+    org.hibernate.SQL: INFO
+  appenders:
+  - type: file-size-rolled
+    threshold: INFO
+    currentLogFilename: /var/log/flipkart/dsp/santa/hugo/app.log
+    archivedLogFilenamePattern: /var/log/flipkart/dsp/santa/hugo/app-%i.log
+    logFormat: "%d{dd-MM-yyyy HH:mm:ss.SSS} [%X{txnId}] [%X{reqId}] [%X{clientId}] [%X{reqHost}] [%thread] %-5level %logger{36} - %msg%n"
+    archivedFileCount: 6
+    timeZone: IST
+zuluConfiguration:
+  host: http://10.47.1.8:31200
+  zclientId: dsp.santa
+  productListingInfoView: product_listing_info
+exclusionListSize: 25000
+offerProperties:
+  properties:
+    fixedPriceMinDiscountPercentage: 5
+    fixedPriceMaxDiscountPercentage: 50
+    fixedPriceTDMaxDiscountPercentage: 100
+    fixedPriceMinLifecycleInDays: 5
+    fixedPriceTDMinLifecycleInDays: 20
+    fixedPriceRangeMinToMax: 500
+    mailSubject: This is the subject for redemption steps mail to be sent to the customer post purchase
+    footer: This will appear after redemption points and T&C in mail
+saleValidationConfig:
+   regStartRegEndTimeWindow: 1800000
+   regEndSaleStartTimeWindow: 900000
+   saleStartSaleEndTimeWindow: 900000
+   optInEndSaleStartTimeWindow: 900000
